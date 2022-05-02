@@ -16,10 +16,11 @@ function GameBoard() {
   const [wordChunks, setWordChunks] = useState([]);
   const [wordLengths, setWordLengths] = useState([]);
   const [selectedTiles, setSelectedTiles] = useState([]);
-  const [answer, setAnswer] = useState('');
+  const [answerChunks, setAnswerChunks] = useState([]);
   const [correctAnswers, setCorrectAnswers] = useState(['','','','','','','']);
   const [usedChunks, setUsedChunks] = useState([]);
   const [wordObject, setWordObject] = useState({});
+  const answer = answerChunks.join('');
 
   useEffect(() => {
     initializeGame();
@@ -113,18 +114,19 @@ function GameBoard() {
       setSelectedTiles([...selectedTiles, index]);
 
       if(usedChunks.indexOf(index) === -1) {
-        setAnswer(`${answer}${value}`);
+        setAnswerChunks([...answerChunks, value]);
       }
     }
   }
 
   const handleGuess = () => {
+    setAnswerChunks([]);
     words.forEach((word, i) => {
+      console.log({word,answerChunks})
       if (word === answer) {
         const updatedAnswers = [...correctAnswers];
         updatedAnswers[i] = word;
         setCorrectAnswers(updatedAnswers);
-        setAnswer('');
 
         for(let key in wordObject) {
           if (key === word) {
@@ -141,15 +143,14 @@ function GameBoard() {
             setUsedChunks(newUsedChunks);
           }
         }
-      } else {
-        setAnswer('');
       }
-    })
+    });
     setSelectedTiles([]);
   }
 
   const shuffle = () => {
     setSelectedTiles([]);
+    setAnswerChunks([]);
     let i = 0;
     const chunksToShuffle = wordChunks.filter(({ index }) => !usedChunks.includes(index));
     const shuffledChunks = shuffleWordChunks(chunksToShuffle);
@@ -163,13 +164,36 @@ function GameBoard() {
     });
     setWordChunks(shuffledAndOrderedWordChunks);
   }
-  console.log({correctAnswers, usedChunks,selectedTiles, wordObject})
+  console.log({correctAnswers, usedChunks,selectedTiles, wordObject, answerChunks})
+
+  const handleBackspace = () => {
+    const tiles = [...selectedTiles];
+    const updatedAnswer = [...answerChunks];
+    tiles.pop();
+    updatedAnswer.pop()
+    console.log({tiles})
+    setSelectedTiles(tiles);
+    setAnswerChunks(updatedAnswer);
+  }
 
   return (
     <>
-      <HintArea definitions={definitions} wordLengths={wordLengths} correctAnswers={correctAnswers} />
-      <ActionBar answer={answer} handleGuess={handleGuess} shuffle={shuffle} />
-      <SelectableTiles wordChunks={wordChunks} setAnswer={onTileClick} usedChunks={usedChunks} />
+      <HintArea 
+        definitions={definitions} 
+        correctAnswers={correctAnswers}
+        wordLengths={wordLengths} 
+      />
+      <ActionBar 
+        answer={answer} 
+        handleBackspace={handleBackspace}
+        handleGuess={handleGuess} 
+        shuffle={shuffle} 
+      />
+      <SelectableTiles 
+        onTileClick={onTileClick}
+        usedChunks={usedChunks}
+        wordChunks={wordChunks} 
+        />
     </>
   )
 }
