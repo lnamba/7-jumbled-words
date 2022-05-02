@@ -17,6 +17,10 @@
   height: 50px;
 }
 
+.correct {
+  background-color: darkgrey;
+}
+
 @media (max-width: 750px) {
   #tiles {
     width: 80%;

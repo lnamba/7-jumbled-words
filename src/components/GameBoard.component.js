@@ -18,7 +18,7 @@ function GameBoard() {
   const [selectedTiles, setSelectedTiles] = useState([]);
   const [answer, setAnswer] = useState('');
   const [correctAnswers, setCorrectAnswers] = useState(['','','','','','','']);
-  const [usedWords, setUsedWords] = useState([]);
+  const [usedChunks, setUsedChunks] = useState([]);
   const [wordObject, setWordObject] = useState({});
 
   useEffect(() => {
@@ -108,20 +108,19 @@ function GameBoard() {
   //   }));
   // });
 
-  const appendAnswer = (value, index) => {
+  const onTileClick = (value, index) => {
     if (selectedTiles.indexOf(index) === -1) {
       setSelectedTiles([...selectedTiles, index]);
-    }
 
-    if(usedWords.indexOf(index) === -1) {
-      setAnswer(`${answer}${value}`);
+      if(usedChunks.indexOf(index) === -1) {
+        setAnswer(`${answer}${value}`);
+      }
     }
   }
 
   const handleGuess = () => {
     words.forEach((word, i) => {
       if (word === answer) {
-        console.log({word, answer,selectedTiles})
         const updatedAnswers = [...correctAnswers];
         updatedAnswers[i] = word;
         setCorrectAnswers(updatedAnswers);
@@ -129,17 +128,17 @@ function GameBoard() {
 
         for(let key in wordObject) {
           if (key === word) {
-            const newUsedWords = [...usedWords];
+            const newUsedChunks = [...usedChunks];
             wordChunks.forEach((_chunk, index) => {
               if (selectedTiles.indexOf(index) > -1) {
-              console.log({newUsedWords,index})
-              if (newUsedWords.indexOf(index) === -1) {
-                  newUsedWords.push(index);
+              console.log({newUsedChunks,index})
+              if (newUsedChunks.indexOf(index) === -1) {
+                  newUsedChunks.push(index);
                 }
               }
             });
-            console.log({usedWords, newUsedWords})
-            setUsedWords(newUsedWords);
+            console.log({usedChunks, newUsedChunks})
+            setUsedChunks(newUsedChunks);
           }
         }
       } else {
@@ -148,13 +147,29 @@ function GameBoard() {
     })
     setSelectedTiles([]);
   }
-  console.log({correctAnswers, usedWords,selectedTiles, wordObject})
+
+  const shuffle = () => {
+    setSelectedTiles([]);
+    let i = 0;
+    const chunksToShuffle = wordChunks.filter(({ index }) => !usedChunks.includes(index));
+    const shuffledChunks = shuffleWordChunks(chunksToShuffle);
+    const shuffledAndOrderedWordChunks = wordChunks.map((item) => {
+      if (!usedChunks.includes(item.index)) {  
+        let returnThis = shuffledChunks[i];
+        i++;
+        return returnThis;
+      }
+      return item;
+    });
+    setWordChunks(shuffledAndOrderedWordChunks);
+  }
+  console.log({correctAnswers, usedChunks,selectedTiles, wordObject})
 
   return (
     <>
       <HintArea definitions={definitions} wordLengths={wordLengths} correctAnswers={correctAnswers} />
-      <ActionBar answer={answer} handleGuess={handleGuess} />
-      <SelectableTiles wordChunks={wordChunks} setAnswer={appendAnswer} />
+      <ActionBar answer={answer} handleGuess={handleGuess} shuffle={shuffle} />
+      <SelectableTiles wordChunks={wordChunks} setAnswer={onTileClick} usedChunks={usedChunks} />
     </>
   )
 }

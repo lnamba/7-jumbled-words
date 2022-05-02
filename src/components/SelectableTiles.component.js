@@ -1,12 +1,14 @@
 import '../styles/SelectableTiles.scss';
 
 function SearchableTiles(props) {
-  const { setAnswer, wordChunks } = props;
-  console.log({wordChunks})
+  const { setAnswer, usedChunks, wordChunks } = props;
+  console.log({wordChunks,usedChunks})
 
   const renderWordChunk = ({ chunk, index }) => {
+    const correct = usedChunks.includes(index);
+    
     return (
-      <div className="tile" key={index} onClick={() => setAnswer(chunk, index)}>
+      <div className={`tile ${correct ? 'correct' : ''}`} key={index} onClick={() => setAnswer(chunk, index)}>
         {chunk}
       </div>
     )
